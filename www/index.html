@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Control Ulises — Dueño</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="app-dueno">
+
+  <!-- Barra superior -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-logo brand-logo-owner" aria-hidden="true">U</div>
+      <div class="brand-text">
+        <h1>Control Ulises</h1>
+        <span id="fecha-hoy-header">Panel Administrativo</span>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <span id="badge-red-dueno" class="pill pill-online">
+        <span class="dot"></span>
+        <span id="texto-red-dueno">En línea</span>
+      </span>
+      <button id="btn-refrescar-todo" type="button" class="btn-icon" title="Actualizar datos" aria-label="Actualizar datos">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+          <path d="M16 16h5v5"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <!-- VISTA 1: RESUMEN Y CONTROL HISTÓRICO -->
+    <section id="vista-resumen" class="vista activa" aria-label="Resumen e historial">
+      <div class="section-header">
+        <div>
+          <h2>Control de ventas</h2>
+          <p class="section-sub">Filtra por fecha y categoría</p>
+        </div>
+        <button id="btn-copiar-cierre" type="button" class="btn btn-outline btn-sm">
+          Copiar reporte
+        </button>
+      </div>
+
+      <!-- Filtro de período -->
+      <div id="chips-periodo-resumen" class="chips-row" role="tablist" aria-label="Filtrar por fecha">
+        <button type="button" class="chip activa" data-periodo="hoy">Hoy</button>
+        <button type="button" class="chip" data-periodo="ayer">Ayer</button>
+        <button type="button" class="chip" data-periodo="semana">Esta semana</button>
+        <button type="button" class="chip" data-periodo="mes">Último mes</button>
+        <button type="button" class="chip" data-periodo="todos">Todos</button>
+      </div>
+
+      <!-- Filtro por categoría -->
+      <div id="chips-categorias-resumen" class="chips-row" role="tablist" aria-label="Filtrar resumen por categoría">
+        <button type="button" class="chip activa" data-cat-resumen="todas">Todas las categorías</button>
+      </div>
+
+      <!-- Tarjetas principales KPI -->
+      <div class="kpi-hero card">
+        <span id="label-total-periodo" class="kpi-label">Total vendido hoy</span>
+        <strong id="kpi-total-dia" class="kpi-hero-value">C$ 0.00</strong>
+        <div class="kpi-hero-meta">
+          <span><strong id="kpi-num-ventas">0</strong> ventas registradas</span>
+          <span>•</span>
+          <span><strong id="kpi-unidades-vendidas">0</strong> unidades salidas</span>
+        </div>
+      </div>
+
+      <div class="kpi-row kpi-row-2">
+        <div class="kpi-card">
+          <span class="kpi-label">Productos activos</span>
+          <strong id="kpi-total-productos" class="kpi-value">0</strong>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Stock bajo</span>
+          <strong id="kpi-stock-bajo" class="kpi-value text-danger">0</strong>
+        </div>
+      </div>
+
+      <!-- Alertas de inventario bajo (ordenadas de menor a mayor stock) -->
+      <div id="bloque-alertas-stock" class="section-block oculto">
+        <h3 class="block-title text-danger">Por agotarse (Reponer pronto)</h3>
+        <div id="lista-stock-bajo" class="list-stack"></div>
+      </div>
+
+      <!-- Qué se vendió vs cuánto queda -->
+      <div class="section-block">
+        <h3 id="titulo-resumen-productos" class="block-title">Vendido hoy y stock restante</h3>
+        <div id="lista-resumen-productos" class="list-stack">
+          <div class="empty-state-sm">Aún no hay ventas registradas en este período.</div>
+        </div>
+      </div>
+
+      <!-- Historial de facturas (agrupado por mes en "Todos") -->
+      <div class="section-block">
+        <h3 id="titulo-facturas-periodo" class="block-title">Facturas de hoy</h3>
+        <div id="lista-facturas-dueno" class="list-stack">
+          <div class="empty-state-sm">Sin movimientos en este período.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA 2: CATÁLOGO DE PRODUCTOS Y PRECIOS -->
+    <section id="vista-productos" class="vista" aria-label="Gestión de productos">
+      <div class="section-header">
+        <div>
+          <h2>Productos y precios</h2>
+          <p class="section-sub">Administra catálogo y existencias</p>
+        </div>
+        <button id="btn-nuevo-producto" type="button" class="btn btn-primary btn-sm">
+          + Nuevo
+        </button>
+      </div>
+
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input id="input-buscar-dueno" type="search" placeholder="Buscar en tu inventario..." autocomplete="off" />
+      </div>
+
+      <div id="chips-categorias-dueno" class="chips-row" role="tablist">
+        <button type="button" class="chip activa" data-categoria="todas">Todos</button>
+      </div>
+
+      <div id="lista-productos-dueno" class="list-stack">
+        <div class="empty-state">Cargando productos...</div>
+      </div>
+    </section>
+
+    <!-- VISTA 3: ENTRADA DE PEDIDOS Y MOVIMIENTOS -->
+    <section id="vista-movimientos" class="vista" aria-label="Pedidos y movimientos">
+      <div class="section-header">
+        <div>
+          <h2>Pedidos y entradas</h2>
+          <p class="section-sub">Registra mercadería nueva o ajustes</p>
+        </div>
+      </div>
+
+      <form id="form-movimiento-dueno" class="card form-stack">
+        <div class="field">
+          <label for="select-prod-movimiento">Producto</label>
+          <select id="select-prod-movimiento" required>
+            <option value="">Selecciona un producto...</option>
+          </select>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="select-tipo-movimiento">Tipo</label>
+            <select id="select-tipo-movimiento" required>
+              <option value="entrada">Entrada de pedido (+)</option>
+              <option value="ajuste">Ajuste de stock (±)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="input-cant-movimiento">Cantidad</label>
+            <input id="input-cant-movimiento" type="number" step="0.01" placeholder="Ej. 25" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="input-nota-movimiento">Nota (opcional)</label>
+          <input id="input-nota-movimiento" type="text" placeholder="Ej. Llegó camión de purina" />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          Registrar movimiento
+        </button>
+      </form>
+
+      <h3 class="block-title">Movimientos recientes</h3>
+      <div id="lista-movimientos-recientes" class="list-stack">
+        <div class="empty-state-sm">Sin movimientos registrados todavía.</div>
+      </div>
+    </section>
+
+    <!-- VISTA 4: PERMISOS DEL TRABAJADOR Y CATEGORÍAS -->
+    <section id="vista-permisos" class="vista" aria-label="Permisos y configuración">
+      <div class="section-header">
+        <div>
+          <h2>Permisos y ajustes</h2>
+          <p class="section-sub">Controla qué puede hacer el trabajador</p>
+        </div>
+      </div>
+
+      <div class="card form-stack">
+        <div class="field">
+          <label for="input-nombre-trabajador">Nombre del trabajador / puesto</label>
+          <input id="input-nombre-trabajador" type="text" placeholder="Ej. Trabajador Tienda" />
+        </div>
+
+        <div class="switch-list">
+          <label class="switch-row" for="toggle-editar-precio">
+            <div class="switch-info">
+              <strong>Permitir editar precios</strong>
+              <span>Deja que el trabajador cambie el precio de un producto al vender.</span>
+            </div>
+            <input id="toggle-editar-precio" type="checkbox" class="switch-input" />
+            <span class="switch-slider" aria-hidden="true"></span>
+          </label>
+
+          <label class="switch-row" for="toggle-registrar-pedido">
+            <div class="switch-info">
+              <strong>Permitir registrar pedidos</strong>
+              <span>Habilita la pestaña de "Pedido" para que sume mercadería recibida.</span>
+            </div>
+            <input id="toggle-registrar-pedido" type="checkbox" class="switch-input" />
+            <span class="switch-slider" aria-hidden="true"></span>
+          </label>
+        </div>
+
+        <button id="btn-guardar-permisos" type="button" class="btn btn-primary btn-block">
+          Guardar permisos
+        </button>
+      </div>
+
+      <!-- Gestión rápida de categorías -->
+      <div class="card form-stack">
+        <h3 class="card-title">Categorías del negocio</h3>
+        <form id="form-nueva-categoria" class="inline-form">
+          <input id="input-nueva-categoria" type="text" placeholder="Ej. Bebidas, Granos..." required />
+          <button type="submit" class="btn btn-outline">Agregar</button>
+        </form>
+        <div id="lista-categorias-config" class="tags-wrap">
+          <!-- Categorías existentes -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Navegación inferior del dueño -->
+  <nav class="bottom-nav" aria-label="Menú administrativo">
+    <button type="button" class="nav-item activa" data-vista="vista-resumen">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/>
+      </svg>
+      <span>Resumen</span>
+    </button>
+
+    <button type="button" class="nav-item" data-vista="vista-productos">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+        <line x1="12" y1="22.08" x2="12" y2="12"/>
+      </svg>
+      <span>Productos</span>
+    </button>
+
+    <button type="button" class="nav-item" data-vista="vista-movimientos">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+        <polyline points="17 6 23 6 23 12"/>
+      </svg>
+      <span>Pedidos</span>
+    </button>
+
+    <button type="button" class="nav-item" data-vista="vista-permisos">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      <span>Permisos</span>
+    </button>
+  </nav>
+
+  <!-- MODAL: CREAR / EDITAR PRODUCTO -->
+  <div id="modal-producto" class="modal-backdrop oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-producto">
+    <div class="modal-sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="modal-header">
+        <h2 id="titulo-modal-producto">Nuevo producto</h2>
+        <button id="btn-cerrar-modal-producto" type="button" class="btn-icon-close" aria-label="Cerrar">✕</button>
+      </div>
+
+      <form id="form-producto" class="modal-body form-stack">
+        <input id="prod-id" type="hidden" />
+
+        <div class="field">
+          <label for="prod-nombre">Nombre del producto</label>
+          <input id="prod-nombre" type="text" placeholder="Ej. Queso seco ahumado (lb)" required />
+        </div>
+
+        <div class="field">
+          <label for="prod-categoria">Categoría</label>
+          <select id="prod-categoria" required>
+            <option value="">Selecciona una categoría...</option>
+          </select>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="prod-precio">Precio venta (C$)</label>
+            <input id="prod-precio" type="number" step="0.01" min="0" placeholder="0.00" required />
+          </div>
+          <div class="field">
+            <label for="prod-stock">Stock actual</label>
+            <input id="prod-stock" type="number" step="0.01" min="0" placeholder="0" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="prod-stock-min">Avisar cuando quede menos de:</label>
+          <input id="prod-stock-min" type="number" step="1" min="0" value="5" required />
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-eliminar-producto" type="button" class="btn btn-danger-outline oculto">Desactivar</button>
+          <button type="submit" class="btn btn-primary btn-block">Guardar producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALLE DE UNA FACTURA -->
+  <div id="modal-detalle-venta" class="modal-backdrop oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-detalle-venta">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 id="titulo-detalle-venta">Detalle de factura</h3>
+          <span id="fecha-detalle-venta" class="modal-subtitle"></span>
+        </div>
+        <button id="btn-cerrar-detalle-venta" type="button" class="btn-icon-close" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div id="lista-items-detalle-venta" class="modal-body list-stack"></div>
+
+      <div class="modal-footer modal-footer-between">
+        <span>Total factura</span>
+        <strong id="total-detalle-venta" class="kpi-value">C$ 0.00</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de notificaciones Toast -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="dueno.js"></script>
+</body>
+</html>
