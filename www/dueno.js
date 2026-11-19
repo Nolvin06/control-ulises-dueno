@@ -442,6 +442,11 @@ function renderResumen() {
   const renderFilaFactura = (v, mostrarFecha) => {
     const numItems = (v.detalle_ventas || []).reduce((s, d) => s + Number(d.cantidad || 0), 0);
     const etiquetaHora = mostrarFecha ? fechaHoraCorta(v.creada_en) : horaCorta(v.creada_en);
+    const ajustes = buscarAjustesDeVenta(v);
+    const etiquetaMod = ajustes.length
+      ? `<span class="badge-status badge-pending">Modificada</span>`
+      : '';
+
     return `
       <div class="item-row clickable" data-venta-id="${esc(v.id)}">
         <div class="item-main">
@@ -450,6 +455,7 @@ function renderResumen() {
         </div>
         <div class="item-right">
           <span class="item-amount">${money(v.total)}</span>
+          ${etiquetaMod}
           <span class="badge-status badge-synced">Ver →</span>
         </div>
       </div>
@@ -473,13 +479,9 @@ function renderResumen() {
       html += grupo.ventas.map((v) => renderFilaFactura(v, true)).join('');
     });
     contFacturas.innerHTML = html;
-  } else {
+ } else {
     const mostrarFecha = state.periodoActivo !== 'hoy';
     contFacturas.innerHTML = ventasFiltradas.map((v) => renderFilaFactura(v, mostrarFecha)).join('');
-    const ajustes = buscarAjustesDeVenta(v);
-    const etiquetaMod = ajustes.length
-      ? `<span class="badge-status badge-pending">Modificada</span>`
-      : '';
   }
 }
 
