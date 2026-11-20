@@ -153,7 +153,7 @@ async function cargarTodo(silencioso = false) {
         query: 'select=*&order=creada_en.desc&limit=500'
       }),
       restRequest('movimientos_inventario', {
-        query: 'select=*&order=creada_en.desc&limit=25'
+        query: 'select=*&order=creada_en.desc&limit=80'
       }),
       restRequest('configuracion_trabajador', { query: 'select=*&id=eq.1' })
     ]);
@@ -968,7 +968,10 @@ async function copiarReporteDelDia() {
 /* ---------------- EVENTOS E INICIO ---------------- */
 function bindEventos() {
   document.querySelectorAll('.nav-item').forEach((btn) => {
-    btn.addEventListener('click', () => cambiarVista(btn.dataset.vista));
+    btn.addEventListener('click', () => {
+      cambiarVista(btn.dataset.vista);
+      if (navigator.onLine) cargarTodo(true);
+    });
   });
 
   $('btn-refrescar-todo').addEventListener('click', () => cargarTodo(false));
@@ -1041,14 +1044,20 @@ function bindEventos() {
   });
   window.addEventListener('offline', actualizarBadgeRed);
 
-  setInterval(() => {
+ setInterval(() => {
     const hayModalAbierto =
       !$('modal-producto').classList.contains('oculto') ||
       !$('modal-detalle-venta').classList.contains('oculto');
-    if (navigator.onLine && !hayModalAbierto) {
+    if (navigator.onLine && !hayModalAbierto && !state.cargando) {
       cargarTodo(true);
     }
-  }, 30000);
+  }, 10000);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && navigator.onLine) {
+      cargarTodo(true);
+    }
+  });
 }
 
 function initDueno() {
